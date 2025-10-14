@@ -88,3 +88,9 @@ npx wrangler tail
 - [Vite Documentation](https://vitejs.dev/guide/)
 - [React Documentation](https://reactjs.org/)
 - [Hono Documentation](https://hono.dev/)
+
+
+First time d1 after generating migrations using drizzle kit 
+- npx wrangler d1 migrations apply test-db
+To execute on remote, add remote flag 
+- npx wrangler d1 migrations apply DB_NAME --remote

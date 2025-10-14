@@ -1,0 +1,8 @@
+export const STATE_LIST = [
+  "REQUESTED",
+  "PENDING_HUMAN_ACTION",
+  "HUMAN_ACTION_COMPLETED",
+  "TIMED_OUT",
+  "FAILED",
+  "CLOSED",
+] as const;

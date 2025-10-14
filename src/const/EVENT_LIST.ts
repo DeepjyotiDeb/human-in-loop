@@ -1,0 +1,10 @@
+export const EVENT_LIST = [
+  "WORKFLOW_INITIATED",
+  "HUMAN_INTERACTION_REQUESTED",
+  "HUMAN_ACTION_SUBMITTED",
+  "HUMAN_INTERACTION_TIMED_OUT",
+  "WORKFLOW_CLOSED",
+  "ERROR_OCCURRED",
+] as const;
+
+export type EventType = (typeof EVENT_LIST)[number];
