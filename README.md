@@ -1,96 +1,297 @@
-# React + Vite + Hono + Cloudflare Workers
+# Human-in-Loop Workflow System
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+A modern, full-stack application that demonstrates human-in-loop workflows with AI agents, built with React, Hono, and Cloudflare Workers. This system enables AI agents to request human intervention when needed, creating a seamless collaboration between artificial intelligence and human decision-making.
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, ESLint integration, and the flexibility of Workers deployments.
+## 🚀 Features
 
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
+### Core Functionality
+- **AI-Powered Chat Interface**: Interactive chatbot with rich text formatting, image support, and custom widgets
+- **Human-in-Loop Workflows**: AI agents can escalate complex decisions to humans
+- **Real-time Communication**: Multi-channel support (web portal, email, SMS, Slack)
+- **Workflow Management**: Track and manage workflow states with comprehensive logging
+- **Decision Tracking**: Capture human decisions with comments and deadlines
 
-<!-- dash-content-start -->
+### Technical Features
+- **Serverless Architecture**: Built on Cloudflare Workers for global edge deployment
+- **Modern React**: React 19 with TypeScript and Tailwind CSS + daisyUI
+- **Database Integration**: SQLite with Drizzle ORM for type-safe database operations
+- **Queue Management**: Upstash QStash for reliable message queuing
+- **API Integration**: RESTful APIs with Hono framework
 
-🚀 Supercharge your web development with this powerful stack:
+## 🛠️ Tech Stack
 
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
+### Frontend
+- **React 19** with TypeScript
+- **Tailwind CSS 4** + **daisyUI 5** for modern UI components
+- **React Router 7** for navigation
+- **TanStack Query** for server state management
+- **Axios** for API calls
 
-### ✨ Key Features
+### Backend
+- **Cloudflare Workers** for serverless compute
+- **Hono** as the web framework
+- **Drizzle ORM** with SQLite for data persistence
+- **Upstash QStash** for message queuing
+- **Cloudflare AI** for AI model integration
 
-- 🔥 Hot Module Replacement (HMR) for rapid development
-- 📦 TypeScript support out of the box
-- 🛠️ ESLint configuration included
-- ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
-- 🔎 Built-in Observability to monitor your Worker
+### Development Tools
+- **Vite** for fast development and building
+- **ESLint** for code linting
+- **TypeScript** for type safety
+- **Wrangler** for Cloudflare deployment
 
-Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
+## 📦 Installation
 
-<!-- dash-content-end -->
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd human-in-loop
+   ```
 
-## Getting Started
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-To start a new project with this template, run:
+3. **Set up environment variables**
+   Create a `wrangler.toml` file with your Cloudflare configuration:
+   ```toml
+   [env.development.vars]
+   QSTASH_URL = "your-qstash-url"
+   QSTASH_TOKEN = "your-qstash-token"
+   AI_TOKEN = "your-ai-token"
+   ```
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
-```
+4. **Set up the database**
+   ```bash
+   npm run studio:dev
+   ```
 
-A live deployment of this template is available at:
-[https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
+## 🚀 Quick Start
 
-## Development
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the development server with:
-
+### Development Mode
 ```bash
 npm run dev
 ```
+This starts the Vite development server with hot module replacement.
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
-
-## Production
-
-Build your project for production:
-
+### Database Management
 ```bash
+# Open Drizzle Studio for database inspection
+npm run studio:dev
+
+# For production database
+npm run studio:prd
+```
+
+### Building and Deployment
+```bash
+# Build the project
 npm run build
+
+# Type checking and dry run
+npm run check
+
+# Deploy to Cloudflare
+npm run deploy
 ```
 
-Preview your build locally:
+## 🏗️ Project Structure
 
+```
+├── src/
+│   ├── const/                 # Constants and type definitions
+│   │   ├── EVENT_LIST.ts      # Workflow event types
+│   │   ├── STATE_LIST.ts      # Workflow state definitions
+│   │   └── WorkflowContext.ts # Core workflow interfaces
+│   │
+│   ├── react-app/             # Frontend React application
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── ChatInput.tsx
+│   │   │   ├── ChatWidget.tsx
+│   │   │   └── MessageRenderer.tsx
+│   │   ├── contexts/          # React contexts
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── pages/             # Route components
+│   │   │   ├── home.tsx
+│   │   │   └── Manage.tsx
+│   │   └── types/             # TypeScript type definitions
+│   │
+│   └── worker/                # Cloudflare Worker backend
+│       ├── index.ts           # Main worker entry point
+│       ├── promptHandler.ts   # AI prompt processing
+│       ├── workflows.ts       # Workflow logic
+│       ├── db/                # Database configuration
+│       │   ├── database.ts
+│       │   └── schema.ts
+│       └── handler/           # Event handlers
+│           └── handlers.ts
+│
+├── public/                    # Static assets
+├── drizzle.config.ts         # Database configuration
+├── vite.config.ts            # Vite configuration
+└── wrangler.json             # Cloudflare Workers config
+```
+
+## 🔧 API Endpoints
+
+### Health Check
+- **GET** `/api/health-check` - System health and database connectivity
+
+### Workflows
+- **GET** `/api/workflows` - List all workflows
+- **POST** `/api/workflows` - Create a new workflow
+
+### Chat Bot
+- **POST** `/api/bot` - Send message to AI chatbot
+
+## 🤖 Workflow System
+
+### Workflow States
+The system supports various workflow states defined in `STATE_LIST.ts`:
+- Initialization
+- AI Processing
+- Human Review Required
+- Decision Pending
+- Completed/Rejected
+
+### Event Types
+Track workflow progress with comprehensive event logging:
+- Workflow started
+- AI decision made
+- Human intervention requested
+- Decision submitted
+- Workflow completed
+
+### Human Interaction
+Support multiple communication channels:
+- **Web Portal**: Direct browser interface
+- **Email**: Email notifications and responses
+- **SMS**: Text message alerts
+- **Slack**: Team collaboration integration
+
+## 🎨 UI Components
+
+### Chat Interface
+- Rich text messaging with markdown support
+- Image sharing capabilities
+- Interactive buttons and quick actions
+- Conversation history management
+
+### Management Dashboard
+- Workflow monitoring and management
+- Decision tracking and analytics
+- User role management
+
+### Design System
+Built with **daisyUI 5** components:
+- Consistent design language
+- Responsive layouts
+- Accessibility compliance
+- Dark/light theme support
+
+## 🧪 Development
+
+### Code Quality
 ```bash
-npm run preview
+# Run linting
+npm run lint
+
+# Type checking
+npm run cf-typegen
 ```
 
-Deploy your project to Cloudflare Workers:
-
+### Database Migrations
+Database schema changes are managed through Drizzle:
 ```bash
-npm run build && npm run deploy
+# Generate migration
+drizzle-kit generate
+
+# Apply migrations
+drizzle-kit migrate
 ```
 
-Monitor your workers:
+## 🚀 Deployment
 
-```bash
-npx wrangler tail
+### Cloudflare Workers
+The application is designed for Cloudflare Workers deployment:
+
+1. **Configure Wrangler**: Update `wrangler.json` with your account details
+2. **Set Environment Variables**: Configure secrets in Cloudflare dashboard
+3. **Deploy**: Run `npm run deploy`
+
+### Environment Variables
+Required environment variables:
+- `DB`: Cloudflare D1 Database binding
+- `QSTASH_URL`: Upstash QStash endpoint
+- `QSTASH_TOKEN`: Upstash authentication token
+- `AI_TOKEN`: Cloudflare AI API token
+- `Ai`: Cloudflare AI binding
+
+## 📝 Usage Examples
+
+### Starting a Workflow
+```typescript
+const workflowContext: WorkflowContext = {
+  metadata: {
+    workflowType: "customer_support",
+    initiator: {
+      type: INITIATOR_TYPE.AI_AGENT,
+      agentId: "agent-123"
+    }
+  },
+  payload: {
+    uiSchema: { /* UI configuration */ },
+    uiData: { /* Form data */ }
+  },
+  humanInteraction: {
+    recipient: {
+      userId: "user-456",
+      channel: COMS_CHANNEL.WEB_PORTAL
+    },
+    response: {
+      submittedAt: null,
+      decision: DECISION.PENDING,
+      comments: null
+    },
+    deadline: "2025-10-15T10:00:00Z"
+  },
+  eventLog: []
+};
 ```
 
-## Additional Resources
+### Chat Integration
+```typescript
+const response = await fetch('/api/bot', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    message: "I need help with my order",
+    conversationHistory: []
+  })
+});
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Resources
 
 - [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://reactjs.org/)
-- [Hono Documentation](https://hono.dev/)
+- [Hono Framework](https://hono.dev/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [daisyUI Components](https://daisyui.com/)
+- [Upstash QStash](https://upstash.com/docs/qstash)
 
+---
 
-First time d1 after generating migrations using drizzle kit 
-- npx wrangler d1 migrations apply test-db
-To execute on remote, add remote flag 
-- npx wrangler d1 migrations apply DB_NAME --remote
+**Built with ❤️ using modern web technologies for seamless human-AI collaboration.**

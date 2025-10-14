@@ -173,7 +173,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         widgets: botWidgets,
         user: {
           id: "bot-1",
-          name: "Customer Service Bot",
+          name: "Sumi ✨",
           avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=customerbot",
         },
       };
@@ -195,7 +195,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         ],
         user: {
           id: "bot-1",
-          name: "Customer Service Bot",
+          name: "Sumi ✨",
           avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=customerbot",
         },
       };
@@ -213,7 +213,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       widgets,
       user: {
         id: "bot-1",
-        name: "Customer Service Bot",
+        name: "Sumi ✨",
         avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=customerbot",
       },
     };

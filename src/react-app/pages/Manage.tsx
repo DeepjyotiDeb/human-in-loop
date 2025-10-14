@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useWorkflows } from "../api/workflows";
+import { useSubmitApproval, useWorkflows } from "../api/workflowsApi";
 
 // Types for the workflow context
 interface WorkflowContext {
@@ -119,8 +119,12 @@ const DynamicFormField: React.FC<{
 };
 
 // Main workflow card component
-const WorkflowCard: React.FC<{ context: WorkflowContext }> = ({ context }) => {
+const WorkflowCard: React.FC<{
+  context: WorkflowContext;
+  workflowId: string;
+}> = ({ context, workflowId }) => {
   const { metadata, payload, humanInteraction } = context;
+  const { mutate } = useSubmitApproval();
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -161,9 +165,26 @@ const WorkflowCard: React.FC<{ context: WorkflowContext }> = ({ context }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log("Form submitted:", formData);
-      // Here you would typically send the data to your API
-      alert("Form submitted successfully!");
+      const submitData = {
+        workflowId,
+        approved: formData.decision === "APPROVE",
+        notes: formData.manager_notes,
+        decision: formData.decision,
+        submittedAt: new Date().toISOString(),
+      };
+
+      console.log("Form submitted:", submitData);
+
+      // Submit to API using the mutation
+      mutate(submitData, {
+        onSuccess: () => {
+          // alert("Decision submitted successfully!");
+        },
+        onError: (error) => {
+          console.error("Submission error:", error);
+          alert("Failed to submit decision. Please try again.");
+        },
+      });
     }
   };
 
@@ -315,7 +336,11 @@ export const Manage = () => {
             try {
               const context: WorkflowContext = JSON.parse(workflow.contextData);
               return (
-                <WorkflowCard key={workflow.id || index} context={context} />
+                <WorkflowCard
+                  key={workflow.workflowId || index}
+                  context={context}
+                  workflowId={workflow.workflowId || `workflow-${index}`}
+                />
               );
             } catch (parseError) {
               return (

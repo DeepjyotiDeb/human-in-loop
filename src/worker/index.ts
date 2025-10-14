@@ -88,23 +88,64 @@ app.post("/api/bot", async (c) => {
 });
 
 app.post("/api/workflows", async (c) => {
-  console.log("Received request to start workflow");
   const message = await c.req.json();
-  const { eventType, workflowId } = message;
+  console.log("Received request to start workflow", message);
+  return;
+  const { eventType, workflowId, state } = message;
   const db = drizzle(c.env.DB);
   const workflow = await db
     .select()
     .from(workflows)
     .where(eq(workflows.workflowId, workflowId));
+  const existingContext = workflow[0].contextData
+    ? JSON.parse(workflow[0].contextData as string)
+    : {};
+
+  const updatedContext = {
+    ...existingContext,
+    eventLog: [
+      ...(existingContext.eventLog || []),
+      {
+        eventType,
+        state,
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  };
+  await db
+    .update(workflows)
+    .set({
+      currentState: state,
+      contextData: JSON.stringify(updatedContext),
+    })
+    .where(eq(workflows.workflowId, workflowId));
   if (!workflow || workflow.length === 0) {
     return c.json({ message: "Workflow not found", status: "error" }, 404);
   }
   // handle event
-  const r = eventHandlers[eventType as keyof typeof eventHandlers];
-  await r(workflow[0].contextData as WorkflowContext);
+  const handler = eventHandlers[eventType as keyof typeof eventHandlers];
+  await handler(workflow[0].contextData as WorkflowContext);
   // advance workflow to the next state
 
   return c.json({ message: "Workflow started", status: "success" });
+});
+
+app.post("/api/workflow-approved", async (c) => {
+  const body = await c.req.json();
+  const client = new Client({
+    token:
+      "eyJVc2VySUQiOiJkZWZhdWx0VXNlciIsIlBhc3N3b3JkIjoiZGVmYXVsdFBhc3N3b3JkIn0=",
+    baseUrl: "http://127.0.0.1:8081",
+  });
+  const publishRes = await client.publishJSON({
+    // url: "https://human-in-loop.gouravdeb.workers.dev/api/workflow-callback",
+    url: "http://localhost:5173/api/workflows",
+    body,
+  });
+  // log res
+  console.log("QStash publish res:", publishRes);
+
+  return c.json({ message: "Workflow approved", status: "success" });
 });
 
 export default app;

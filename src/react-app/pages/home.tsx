@@ -46,8 +46,9 @@ const Home = () => {
               <div className="card-body">
                 <h2 className="card-title">Welcome, {name}!</h2>
                 <p>
-                  This is a demo application showcasing a customer service
-                  chatbot with custom widgets.
+                  This is a demo application showcasing a emloyee expense
+                  approval workflow with human-in-the-loop capabilities,
+                  integrated with an AI chatbot.
                 </p>
 
                 <div className="card-actions justify-start mt-4">
@@ -60,8 +61,19 @@ const Home = () => {
                 </div>
               </div>
             </div>
-
+            {/* route to manager's page */}
             <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <div className="card-actions">
+                  <a href="/manage" className="btn btn-primary" target="_blank">
+                    {" "}
+                    Go to Manager's Page{" "}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <h2 className="card-title">🤖 Chatbot Features</h2>
                 <div className="space-y-3">
@@ -117,7 +129,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Chat Widget */}
@@ -127,7 +139,7 @@ const Home = () => {
                 <div className="sticky top-6">
                   <ChatWidget
                     height="700px"
-                    title="Customer Service Chat"
+                    title="Sumi ✨"
                     onClose={() => setShowChat(false)}
                   />
                 </div>
