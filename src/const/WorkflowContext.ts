@@ -1,4 +1,5 @@
 import { EventType } from "./EVENT_LIST";
+import { StateType } from "./STATE_LIST";
 
 export enum INITIATOR_TYPE {
   AI_AGENT = "AI_AGENT",
@@ -43,6 +44,7 @@ export interface WorkflowContext {
   eventLog: {
     timestamp: string;
     eventType: EventType;
+    state: StateType;
     details?: Record<string, unknown>;
   }[];
 }

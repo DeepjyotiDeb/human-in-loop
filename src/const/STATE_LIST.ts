@@ -7,3 +7,5 @@ export const STATE_LIST = [
   "FAILED",
   "CLOSED",
 ] as const;
+
+export type StateType = (typeof STATE_LIST)[number];

@@ -228,6 +228,9 @@ Required environment variables:
 - `AI_TOKEN`: Cloudflare AI API token
 - `Ai`: Cloudflare AI binding
 
+During local development start upstash queue using
+`npx @upstash/qstash-cli dev -port=8081`
+
 ## 📝 Usage Examples
 
 ### Starting a Workflow

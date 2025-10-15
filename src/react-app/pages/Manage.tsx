@@ -46,6 +46,7 @@ const DynamicFormField: React.FC<{
   onChange: (name: string, value: any) => void;
 }> = ({ name, schema, value, onChange }) => {
   const { type, title, readOnly, enum: enumValues } = schema;
+  // console.log("name", name, schema);
   const isTextarea = schema["ui:widget"] === "textarea";
 
   if (readOnly) {
@@ -55,7 +56,7 @@ const DynamicFormField: React.FC<{
           <span className="label-text font-semibold">{title}</span>
         </label>
         <div className="input input-bordered bg-base-200 cursor-not-allowed">
-          {type === "number" ? `$${value}` : value}
+          {type === "number" ? `₹ ${value}` : value}
         </div>
       </div>
     );
@@ -130,8 +131,9 @@ const WorkflowCard: React.FC<{
 
   useEffect(() => {
     // Initialize form with existing data
+    console.log("payload", context);
     setFormData({ ...payload.uiData });
-  }, [payload.uiData]);
+  }, [payload?.uiData]);
 
   const handleFieldChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -164,28 +166,65 @@ const WorkflowCard: React.FC<{
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      const submitData = {
-        workflowId,
-        approved: formData.decision === "APPROVE",
-        notes: formData.manager_notes,
-        decision: formData.decision,
-        submittedAt: new Date().toISOString(),
-      };
-
-      console.log("Form submitted:", submitData);
-
-      // Submit to API using the mutation
-      mutate(submitData, {
-        onSuccess: () => {
-          // alert("Decision submitted successfully!");
-        },
-        onError: (error) => {
-          console.error("Submission error:", error);
-          alert("Failed to submit decision. Please try again.");
-        },
-      });
+    // console.log("form", formData, humanInteraction?.response?.decision);
+    // return;
+    // if current state is interaction completed, do not allow resubmission
+    if (humanInteraction?.response?.decision !== "PENDING") {
+      alert("This request has already been completed.");
+      return;
     }
+    // if (validateForm()) {
+    const submitData = {
+      workflowId,
+      // approved: formData.decision === "APPROVE",
+      eventType: "HUMAN_ACTION_SUBMITTED",
+      notes: formData.manager_notes,
+      initiatedBy: humanInteraction.recipient.userId,
+      state: "HUMAN_ACTION_COMPLETED",
+      decision: formData.decision,
+      submittedAt: new Date().toISOString(),
+    };
+
+    console.log("Form submitted:", submitData);
+
+    // Submit to API using the mutation
+    mutate(submitData, {
+      onSuccess: () => {
+        // alert("Decision submitted successfully!");
+      },
+      onError: (error) => {
+        console.error("Submission error:", error);
+        alert("Failed to submit decision. Please try again.");
+      },
+    });
+    // }
+  };
+
+  const handleRollback = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (humanInteraction?.response?.decision === "PENDING") {
+      alert("This request is still pending.");
+      return;
+    }
+    // if (validateForm()) {
+    const rollbackData = {
+      workflowId,
+      eventType: "HUMAN_ACTION_ROLLED_BACK",
+      initiatedBy: humanInteraction.recipient.userId,
+      state: "REQUESTED",
+      decision: "PENDING",
+      submittedAt: null,
+    };
+    mutate(rollbackData, {
+      onSuccess: () => {
+        // alert("Request rolled back successfully!");
+      },
+      onError: (error) => {
+        console.error("Rollback error:", error);
+        alert("Failed to rollback request. Please try again.");
+      },
+    });
+    // }
   };
 
   const getDeadlineStatus = () => {
@@ -247,11 +286,20 @@ const WorkflowCard: React.FC<{
           )}
 
           <div className="card-actions justify-end pt-4">
-            <button type="button" className="btn btn-outline">
-              Save Draft
-            </button>
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={humanInteraction?.response?.decision !== "PENDING"}
+            >
               Submit Decision
+            </button>
+            <button
+              type="button"
+              onClick={handleRollback}
+              disabled={humanInteraction?.response?.decision === "PENDING"}
+              className="btn btn-outline"
+            >
+              Rollback
             </button>
           </div>
         </form>
@@ -334,7 +382,12 @@ export const Manage = () => {
         <div className="space-y-6">
           {workflows.map((workflow: any, index: number) => {
             try {
-              const context: WorkflowContext = JSON.parse(workflow.contextData);
+              let context: WorkflowContext;
+              try {
+                context = JSON.parse(workflow.contextData);
+              } catch (error) {
+                context = workflow.contextData;
+              }
               return (
                 <WorkflowCard
                   key={workflow.workflowId || index}
@@ -348,6 +401,11 @@ export const Manage = () => {
                   <div className="card-body">
                     <div className="alert alert-error">
                       <span>Error parsing workflow data</span>
+                      {/* log parse error */}
+
+                      {parseError instanceof Error
+                        ? parseError.message
+                        : String(parseError)}
                     </div>
                   </div>
                 </div>

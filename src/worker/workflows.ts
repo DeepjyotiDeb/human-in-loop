@@ -18,7 +18,6 @@ type ClientDetails = {
 
 export const startWorkflow = async (
   D1: D1Database,
-  QSTASH_TOKEN: string,
   clientDetails: ClientDetails
 ) => {
   const db = drizzle(D1);
@@ -39,7 +38,7 @@ export const startWorkflow = async (
         type: "object",
         properties: {
           employeeName: { type: "string", title: "Employee", readOnly: true },
-          amount: { type: "number", title: "Amount (USD)", readOnly: true },
+          amount: { type: "number", title: "Amount (INR)", readOnly: true },
           reason: { type: "string", title: "Reason", readOnly: true },
           decision: {
             type: "string",
@@ -70,20 +69,22 @@ export const startWorkflow = async (
       },
     },
     eventLog: [
-      {
-        eventType: "HUMAN_INTERACTION_REQUESTED",
-        timestamp: new Date().toISOString(),
-        details: {
-          initiatedBy: "accountant_bot_v1",
-        },
-      },
+      // {
+      //   eventType: "HUMAN_INTERACTION_REQUESTED",
+      //   timestamp: new Date().toISOString(),
+      //   state: "REQUESTED",
+      //   details: {
+      //     initiatedBy: "accountant_bot_v1",
+      //     decision: DECISION.PENDING,
+      //   },
+      // },
     ],
   };
   const res = await db
     .insert(workflows)
     .values({
       currentState: "REQUESTED",
-      contextData: JSON.stringify(workflow),
+      contextData: workflow,
     })
     .returning({ workflowId: workflows.workflowId });
 
@@ -99,6 +100,8 @@ export const startWorkflow = async (
     body: {
       workflowId: res[0].workflowId,
       eventType: "HUMAN_INTERACTION_REQUESTED",
+      state: "REQUESTED",
+      initiatedBy: "accountant_bot_v1",
     },
   });
   // log res

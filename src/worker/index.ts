@@ -13,10 +13,11 @@ import { eventHandlers } from "./handler/handlers";
 import { promptHandler, responseSchema } from "./promptHandler";
 
 export interface Env {
-  DB: D1Database;
   QSTASH_URL: string;
   QSTASH_TOKEN: string;
+  MAIL_TOKEN: string;
   AI_TOKEN: string;
+  DB: D1Database;
   Ai: Ai;
 }
 
@@ -35,7 +36,8 @@ app.get("/api/workflows", async (c) => {
 });
 
 app.post("/api/bot", async (c) => {
-  const body = await c.req.text();
+  const body = await c.req.json();
+  console.log("rcvd msg");
 
   let userMessage: string;
   let conversationHistory: Array<{
@@ -44,9 +46,8 @@ app.post("/api/bot", async (c) => {
   }> = [];
 
   try {
-    const parsed = JSON.parse(body);
-    userMessage = parsed.message;
-    conversationHistory = parsed.conversationHistory || [];
+    userMessage = body.message;
+    conversationHistory = body.conversationHistory || [];
   } catch (error) {
     userMessage = body;
   }
@@ -54,20 +55,26 @@ app.post("/api/bot", async (c) => {
   const unifiedPrompt = promptHandler(userMessage, conversationHistory);
 
   const aiResponse = await c.env.Ai.run(
-    "@cf/meta/llama-4-scout-17b-16e-instruct",
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     {
       prompt: unifiedPrompt,
       response_format: { type: "json_schema", json_schema: responseSchema },
     }
   );
 
-  const result = aiResponse.response as any;
-
-  // 3. Handle the structured response with simple logic
-  if (result.status === "complete" && result.extractedData) {
+  //@ts-ignore
+  const result = aiResponse?.response as any;
+  console.log("result", result);
+  // Handle the simplified response structure
+  if (
+    result.status === "complete" &&
+    result.name &&
+    result.amount &&
+    result.reason
+  ) {
     // SUCCESS CASE: We have all the data
-    const { name, amount, reason } = result.extractedData;
-    const workflowResponse = await startWorkflow(c.env.DB, c.env.QSTASH_TOKEN, {
+    const { name, amount, reason } = result;
+    const workflowResponse = await startWorkflow(c.env.DB, {
       name,
       amount,
       reason,
@@ -78,7 +85,7 @@ app.post("/api/bot", async (c) => {
       Amount: $${amount} for ${reason}. Your workflow ID is ${workflowResponse}.`,
     });
   } else {
-    // FALLBACK CASE: AI generated a reply for us
+    // FALLBACK CASE: Use AI's reply or default message
     return c.json({
       message:
         result.replyMessage ||
@@ -87,28 +94,46 @@ app.post("/api/bot", async (c) => {
   }
 });
 
+// updates db with new state and context data
+// calls event handler
+// advances workflow to next state
 app.post("/api/workflows", async (c) => {
   const message = await c.req.json();
   console.log("Received request to start workflow", message);
-  return;
-  const { eventType, workflowId, state } = message;
+  // return;
+  const { eventType, workflowId, state, initiatedBy, decision } = message;
   const db = drizzle(c.env.DB);
+  // const handler
   const workflow = await db
     .select()
     .from(workflows)
     .where(eq(workflows.workflowId, workflowId));
-  const existingContext = workflow[0].contextData
-    ? JSON.parse(workflow[0].contextData as string)
-    : {};
+  if (!workflow || workflow.length === 0) {
+    return c.json({ message: "Workflow not found", status: "error" }, 404);
+  }
+  const existingContext = workflow[0].contextData as WorkflowContext;
 
-  const updatedContext = {
+  const updatedContext: WorkflowContext = {
     ...existingContext,
+    humanInteraction: {
+      ...existingContext.humanInteraction,
+      response: {
+        ...existingContext.humanInteraction?.response,
+        decision:
+          decision || existingContext.humanInteraction?.response.decision,
+      },
+    },
     eventLog: [
       ...(existingContext.eventLog || []),
       {
         eventType,
         state,
         timestamp: new Date().toISOString(),
+        details: {
+          initiatedBy,
+          decision:
+            decision || existingContext.humanInteraction?.response.decision,
+        },
       },
     ],
   };
@@ -116,16 +141,25 @@ app.post("/api/workflows", async (c) => {
     .update(workflows)
     .set({
       currentState: state,
-      contextData: JSON.stringify(updatedContext),
+      contextData: updatedContext,
+      updatedAt: new Date().toISOString(),
     })
     .where(eq(workflows.workflowId, workflowId));
+
   if (!workflow || workflow.length === 0) {
     return c.json({ message: "Workflow not found", status: "error" }, 404);
   }
-  // handle event
+  console.log("expense process");
+  // event handler
   const handler = eventHandlers[eventType as keyof typeof eventHandlers];
-  await handler(workflow[0].contextData as WorkflowContext);
-  // advance workflow to the next state
+  if (!handler) {
+    console.log("No handler for event type", eventType);
+    return c.json(
+      { message: "No handler for event type", status: "error" },
+      300
+    );
+  }
+  await handler(workflow[0].contextData as WorkflowContext, c.env);
 
   return c.json({ message: "Workflow started", status: "success" });
 });

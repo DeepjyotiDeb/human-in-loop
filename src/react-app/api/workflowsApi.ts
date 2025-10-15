@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "./api";
 
 const fetchWorkflows = async () => {
@@ -14,15 +14,19 @@ const useWorkflows = () => {
 };
 
 const useSubmitApproval = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: {
       workflowId: string;
-      approved: boolean;
       notes?: string;
       additionalData?: Record<string, any>;
     }) => {
       const res = await api.post("/api/workflow-approved", data);
       return res.data;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["workflows"] });
     },
   });
 };

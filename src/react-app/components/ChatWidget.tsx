@@ -35,7 +35,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           {
             type: "text" as const,
             content:
-              "👋 Hello! Welcome to our customer service. I'm here to help you with any questions or concerns you may have.",
+              "👋 Hello! I am Sumi. I'm here to resolve your issues related to expenses.",
           },
           {
             type: "buttons" as const,
@@ -175,7 +175,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           <div
             key={message.id}
             className={`chat ${
-              message.sender === "user" ? "chat-end" : "chat-start"
+              message.sender === "user" ? "chat-end text-right" : "chat-start"
             }`}
           >
             <div className="chat-image avatar">
