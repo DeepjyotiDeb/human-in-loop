@@ -50,15 +50,6 @@ const Home = () => {
                   approval workflow with human-in-the-loop capabilities,
                   integrated with an AI chatbot.
                 </p>
-
-                <div className="card-actions justify-start mt-4">
-                  <button className="btn btn-outline" onClick={apiCall}>
-                    Call API
-                  </button>
-                  <button className="btn btn-secondary" onClick={startWorkflow}>
-                    Start Workflow
-                  </button>
-                </div>
               </div>
             </div>
             {/* route to manager's page */}

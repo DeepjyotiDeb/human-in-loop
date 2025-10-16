@@ -11,14 +11,20 @@ import {
 import { Client } from "@upstash/qstash";
 
 type ClientDetails = {
-  name: string;
+  email: string;
   amount: number;
   reason: string;
 };
 
+type QStashConfig = {
+  QSTASH_URL: string;
+  QSTASH_TOKEN: string;
+};
+
 export const startWorkflow = async (
   D1: D1Database,
-  clientDetails: ClientDetails
+  clientDetails: ClientDetails,
+  qstashConfig: QStashConfig
 ) => {
   const db = drizzle(D1);
   const deadline = new Date();
@@ -54,7 +60,7 @@ export const startWorkflow = async (
         required: ["decision"],
       },
       uiData: {
-        employeeName: clientDetails.name,
+        employeeName: clientDetails.email,
         amount: clientDetails.amount,
         reason: clientDetails.reason,
       },
@@ -90,13 +96,12 @@ export const startWorkflow = async (
 
   // const client = new Client({ token: QSTASH_TOKEN });
   const client = new Client({
-    token:
-      "eyJVc2VySUQiOiJkZWZhdWx0VXNlciIsIlBhc3N3b3JkIjoiZGVmYXVsdFBhc3N3b3JkIn0=",
-    baseUrl: "http://127.0.0.1:8081",
+    token: qstashConfig.QSTASH_TOKEN,
+    baseUrl: qstashConfig.QSTASH_URL,
   });
   const publishRes = await client.publishJSON({
-    // url: "https://human-in-loop.gouravdeb.workers.dev/api/workflow-callback",
-    url: "http://localhost:5173/api/workflows",
+    // url: "http://localhost:5173/api/workflows",
+    url: "https://human-in-loop.gouravdeb.workers.dev/api/workflows",
     body: {
       workflowId: res[0].workflowId,
       eventType: "HUMAN_INTERACTION_REQUESTED",

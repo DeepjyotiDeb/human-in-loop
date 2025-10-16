@@ -20,14 +20,17 @@ const handleActionSubmitted = async (workflow: WorkflowContext, env: any) => {
     const decision = workflow.humanInteraction?.response?.decision;
 
     // Determine recipient email (you might want to get this from workflow context)
-    const recipientEmail = "gouravdeb@gmail.com"; // Replace with actual recipient logic
+    const recipientEmail = employeeName; // Replace with actual recipient logic
+
+    // parse name out of email
+    const name = recipientEmail.split("@")[0];
 
     // Create email content based on decision
-    const subject = `Expense ${decision}: ${employeeName}`;
+    const subject = `Expense ${decision}: ${name}`;
     const text = `Your expense request for ₹${amount} (${reason}) has been ${decision}.`;
     const html = `
       <h2>Expense Request ${decision}</h2>
-      <p><strong>Name:</strong> ${employeeName}</p>
+      <p><strong>Name:</strong> ${name}</p>
       <p><strong>Amount:</strong> ₹${amount}</p>
       <p><strong>Reason:</strong> ${reason}</p>
       <p><strong>Status:</strong> ${decision}</p>
@@ -35,7 +38,7 @@ const handleActionSubmitted = async (workflow: WorkflowContext, env: any) => {
 
     // You'll need to pass the API token - add it to your Env interface
     const apiToken = env.MAIL_TOKEN; // Add this to your environment
-    console.log("api token", apiToken);
+    // console.log("api token", apiToken);
     await sendEmail(recipientEmail, subject, text, html, apiToken);
     console.log("Email sent successfully");
   } catch (error) {

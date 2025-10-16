@@ -2,11 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { workflows } from "./db/schema";
 import { Client } from "@upstash/qstash";
-import {
-  COMS_CHANNEL,
-  INITIATOR_TYPE,
-  WorkflowContext,
-} from "../const/WorkflowContext";
+import { WorkflowContext } from "../const/WorkflowContext";
 import { startWorkflow } from "./workflows";
 import { eq } from "drizzle-orm";
 import { eventHandlers } from "./handler/handlers";
@@ -16,23 +12,14 @@ export interface Env {
   QSTASH_URL: string;
   QSTASH_TOKEN: string;
   MAIL_TOKEN: string;
-  AI_TOKEN: string;
   DB: D1Database;
   Ai: Ai;
 }
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/api/health-check", async (c) => {
-  const db = drizzle(c.env.DB);
-  const res = await db.select().from(workflows).all();
-  return c.json({ name: "Cloudflare", res });
-});
-
-app.get("/api/workflows", async (c) => {
-  const db = drizzle(c.env.DB);
-  const res = await db.select().from(workflows).all();
-  return c.json({ workflows: res });
+app.get("/api/health-check", (c) => {
+  return c.json({ name: "Cloudflare" });
 });
 
 app.post("/api/bot", async (c) => {
@@ -68,20 +55,27 @@ app.post("/api/bot", async (c) => {
   // Handle the simplified response structure
   if (
     result.status === "complete" &&
-    result.name &&
+    result.email &&
     result.amount &&
     result.reason
   ) {
     // SUCCESS CASE: We have all the data
-    const { name, amount, reason } = result;
-    const workflowResponse = await startWorkflow(c.env.DB, {
-      name,
-      amount,
-      reason,
-    });
+    const { email, amount, reason } = result;
+    const workflowResponse = await startWorkflow(
+      c.env.DB,
+      {
+        email,
+        amount,
+        reason,
+      },
+      {
+        QSTASH_TOKEN: c.env.QSTASH_TOKEN,
+        QSTASH_URL: c.env.QSTASH_URL,
+      }
+    );
 
     return c.json({
-      message: `I've started the expense approval workflow for ${name}. 
+      message: `I've started the expense approval workflow for ${email}. 
       Amount: $${amount} for ${reason}. Your workflow ID is ${workflowResponse}.`,
     });
   } else {
@@ -89,11 +83,22 @@ app.post("/api/bot", async (c) => {
     return c.json({
       message:
         result.replyMessage ||
-        "I'm sorry, I'm having trouble understanding. Could you please provide the name, amount, and reason for your expense?",
+        "I'm sorry, I'm having trouble understanding. Could you please provide the email, amount, and reason for your expense?",
     });
   }
 });
 
+app.get("/api/workflows", async (c) => {
+  try {
+    const db = drizzle(c.env.DB);
+    const allWorkflows = await db.select().from(workflows);
+    return c.json(allWorkflows);
+  } catch (error) {
+    console.log("error", error);
+    c.status(500);
+    return c.json({ message: "Internal Server Error", error });
+  }
+});
 // updates db with new state and context data
 // calls event handler
 // advances workflow to next state
@@ -167,13 +172,12 @@ app.post("/api/workflows", async (c) => {
 app.post("/api/workflow-approved", async (c) => {
   const body = await c.req.json();
   const client = new Client({
-    token:
-      "eyJVc2VySUQiOiJkZWZhdWx0VXNlciIsIlBhc3N3b3JkIjoiZGVmYXVsdFBhc3N3b3JkIn0=",
-    baseUrl: "http://127.0.0.1:8081",
+    token: c.env.QSTASH_TOKEN,
+    baseUrl: c.env.QSTASH_URL,
   });
   const publishRes = await client.publishJSON({
-    // url: "https://human-in-loop.gouravdeb.workers.dev/api/workflow-callback",
-    url: "http://localhost:5173/api/workflows",
+    url: "https://human-in-loop.gouravdeb.workers.dev/api/workflows",
+    // url: "http://localhost:5173/api/workflows",
     body,
   });
   // log res

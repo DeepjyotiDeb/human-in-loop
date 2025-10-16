@@ -1,13 +1,19 @@
-# Human-in-Loop Workflow System
+# Human-in-Loop Workflow System with rollback
 
-A modern, full-stack application that demonstrates human-in-loop workflows with AI agents, built with React, Hono, and Cloudflare Workers. This system enables AI agents to request human intervention when needed, creating a seamless collaboration between artificial intelligence and human decision-making.
+A modern, full-stack application that demonstrates human-in-loop workflows with AI agents, built with React, Hono, and Cloudflare Workers. This system enables AI agents to request human intervention when needed.
 
-## 🚀 Features
+The key part of my design invloves the event log in the context data of the workflows table. The event log acts as the single source of truth to keep track of the current state of the system. Any updates adds to this array, even a rollback would be another addition to this array. A queue has been implemented using qstash. Any service that requires an external agent to require with is pushed to a queue so that the api is not bogged by i/o hangups. The dynamic ui is also managed by a schema which can be updated as depending on our requirements.
+
+On approval of workflow by the manager, an email is sent to the persons name
+
+The rest of this document has been generated using AI to give a rough overview of the overall structure of the project.
+
+## Features
 
 ### Core Functionality
 - **AI-Powered Chat Interface**: Interactive chatbot with rich text formatting, image support, and custom widgets
 - **Human-in-Loop Workflows**: AI agents can escalate complex decisions to humans
-- **Real-time Communication**: Multi-channel support (web portal, email, SMS, Slack)
+- **Real-time Communication**: Multi-channel support (web portal, email)
 - **Workflow Management**: Track and manage workflow states with comprehensive logging
 - **Decision Tracking**: Capture human decisions with comments and deadlines
 
@@ -18,7 +24,7 @@ A modern, full-stack application that demonstrates human-in-loop workflows with 
 - **Queue Management**: Upstash QStash for reliable message queuing
 - **API Integration**: RESTful APIs with Hono framework
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React 19** with TypeScript
@@ -40,7 +46,7 @@ A modern, full-stack application that demonstrates human-in-loop workflows with 
 - **TypeScript** for type safety
 - **Wrangler** for Cloudflare deployment
 
-## 📦 Installation
+## Installation
 
 1. **Clone the repository**
    ```bash
@@ -59,7 +65,7 @@ A modern, full-stack application that demonstrates human-in-loop workflows with 
    [env.development.vars]
    QSTASH_URL = "your-qstash-url"
    QSTASH_TOKEN = "your-qstash-token"
-   AI_TOKEN = "your-ai-token"
+   MAIL_TOKEN = "your-mail-token"
    ```
 
 4. **Set up the database**
@@ -67,7 +73,7 @@ A modern, full-stack application that demonstrates human-in-loop workflows with 
    npm run studio:dev
    ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Development Mode
 ```bash
@@ -96,7 +102,7 @@ npm run check
 npm run deploy
 ```
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 ├── src/
@@ -133,7 +139,7 @@ npm run deploy
 └── wrangler.json             # Cloudflare Workers config
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Health Check
 - **GET** `/api/health-check` - System health and database connectivity
@@ -145,7 +151,7 @@ npm run deploy
 ### Chat Bot
 - **POST** `/api/bot` - Send message to AI chatbot
 
-## 🤖 Workflow System
+## Workflow System
 
 ### Workflow States
 The system supports various workflow states defined in `STATE_LIST.ts`:
@@ -170,7 +176,7 @@ Support multiple communication channels:
 - **SMS**: Text message alerts
 - **Slack**: Team collaboration integration
 
-## 🎨 UI Components
+## UI Components
 
 ### Chat Interface
 - Rich text messaging with markdown support
@@ -211,7 +217,7 @@ drizzle-kit generate
 drizzle-kit migrate
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Cloudflare Workers
 The application is designed for Cloudflare Workers deployment:
@@ -222,16 +228,14 @@ The application is designed for Cloudflare Workers deployment:
 
 ### Environment Variables
 Required environment variables:
-- `DB`: Cloudflare D1 Database binding
 - `QSTASH_URL`: Upstash QStash endpoint
 - `QSTASH_TOKEN`: Upstash authentication token
-- `AI_TOKEN`: Cloudflare AI API token
-- `Ai`: Cloudflare AI binding
+- `MAIL_TOKEN`: mailer send token
 
 During local development start upstash queue using
 `npx @upstash/qstash-cli dev -port=8081`
 
-## 📝 Usage Examples
+## Usage Examples
 
 ### Starting a Workflow
 ```typescript
@@ -275,26 +279,11 @@ const response = await fetch('/api/bot', {
 });
 ```
 
-## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Related Resources
+## Related Resources
 
 - [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
 - [Hono Framework](https://hono.dev/)
 - [Drizzle ORM](https://orm.drizzle.team/)
 - [daisyUI Components](https://daisyui.com/)
 - [Upstash QStash](https://upstash.com/docs/qstash)
-
----
-
-**Built with ❤️ using modern web technologies for seamless human-AI collaboration.**

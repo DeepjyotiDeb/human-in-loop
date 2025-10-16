@@ -131,7 +131,7 @@ const WorkflowCard: React.FC<{
 
   useEffect(() => {
     // Initialize form with existing data
-    console.log("payload", context);
+    // console.log("payload", context);
     setFormData({ ...payload.uiData });
   }, [payload?.uiData]);
 
@@ -173,31 +173,31 @@ const WorkflowCard: React.FC<{
       alert("This request has already been completed.");
       return;
     }
-    // if (validateForm()) {
-    const submitData = {
-      workflowId,
-      // approved: formData.decision === "APPROVE",
-      eventType: "HUMAN_ACTION_SUBMITTED",
-      notes: formData.manager_notes,
-      initiatedBy: humanInteraction.recipient.userId,
-      state: "HUMAN_ACTION_COMPLETED",
-      decision: formData.decision,
-      submittedAt: new Date().toISOString(),
-    };
+    if (validateForm()) {
+      const submitData = {
+        workflowId,
+        // approved: formData.decision === "APPROVE",
+        eventType: "HUMAN_ACTION_SUBMITTED",
+        notes: formData.manager_notes,
+        initiatedBy: humanInteraction.recipient.userId,
+        state: "HUMAN_ACTION_COMPLETED",
+        decision: formData.decision,
+        submittedAt: new Date().toISOString(),
+      };
 
-    console.log("Form submitted:", submitData);
+      console.log("Form submitted:", submitData);
 
-    // Submit to API using the mutation
-    mutate(submitData, {
-      onSuccess: () => {
-        // alert("Decision submitted successfully!");
-      },
-      onError: (error) => {
-        console.error("Submission error:", error);
-        alert("Failed to submit decision. Please try again.");
-      },
-    });
-    // }
+      // Submit to API using the mutation
+      mutate(submitData, {
+        onSuccess: () => {
+          // alert("Decision submitted successfully!");
+        },
+        onError: (error) => {
+          console.error("Submission error:", error);
+          alert("Failed to submit decision. Please try again.");
+        },
+      });
+    }
   };
 
   const handleRollback = (e: React.FormEvent) => {
@@ -357,8 +357,8 @@ export const Manage = () => {
     );
   }
 
-  const workflows = data?.workflows || [];
-
+  const workflows = data || [];
+  // console.log("workflow", data);
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">

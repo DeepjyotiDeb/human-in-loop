@@ -17,8 +17,10 @@
 		{
 			"binding": "DB",
 			"database_name": "test-db",
-			"database_id": "test-db-v1",
-			"migrations_dir": "./src/worker/drizzle"
+			// "database_id": "test-db-v1",
+			"database_id": "b323f6ac-16a6-47a1-98b9-490a8ff3fd77",
+			"migrations_dir": "./src/worker/drizzle",
+			"remote": true
 		}
 	],
 	"ai": {
