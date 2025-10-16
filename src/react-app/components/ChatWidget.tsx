@@ -35,7 +35,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
           {
             type: "text" as const,
             content:
-              "👋 Hello! I am Sumi. I'm here to resolve your issues related to expenses.",
+              "👋 Hello! I am Sumi. I'm here for expense approvals. Please provide me with your mail, amount and reason to get started!",
           },
           {
             type: "buttons" as const,
@@ -230,7 +230,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
             <div className="chat-bubble chat-bubble-secondary">
               <div className="flex items-center gap-2">
                 <span className="loading loading-dots loading-sm"></span>
-                <span className="text-sm opacity-70">Support is typing...</span>
+                <span className="text-sm opacity-70">Sumi is typing...</span>
               </div>
             </div>
           </div>
