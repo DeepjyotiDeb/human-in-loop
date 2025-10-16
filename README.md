@@ -4,7 +4,7 @@ A modern, full-stack application that demonstrates human-in-loop workflows with 
 
 The key part of my design invloves the event log in the context data of the workflows table. The event log acts as the single source of truth to keep track of the current state of the system. Any updates adds to this array, even a rollback would be another addition to this array. A queue has been implemented using qstash. Any service that requires an external agent to require with is pushed to a queue so that the api is not bogged by i/o hangups. The dynamic ui is also managed by a schema which can be updated as depending on our requirements.
 
-On approval of workflow by the manager, an email is sent to the persons name
+On approval of workflow by the manager, a mail is sent to the persons email
 
 The rest of this document has been generated using AI to give a rough overview of the overall structure of the project.
 
